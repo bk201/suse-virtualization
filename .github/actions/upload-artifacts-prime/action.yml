@@ -1,0 +1,33 @@
+name: 'Upload Artifacts to Prime'
+description: 'Upload build artifacts to Prime S3 bucket'
+
+inputs:
+  artifacts_path:
+    description: 'Path to artifacts to upload (supports wildcards)'
+    required: true
+  destination:
+    description: 'S3 destination path (without s3:// prefix and bucket name)'
+    required: true
+  bucket_name:
+    description: 'S3 bucket name'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Read Prime Upload Credentials
+      uses: rancher-eio/read-vault-secrets@main
+      with:
+        secrets: |
+          secret/data/github/repo/${{ github.repository }}/prime-artifacts/credentials AWS_ACCESS_KEY_ID | PRIME_ARTIFACTS_UPLOADER_ACCESS_KEY ;
+          secret/data/github/repo/${{ github.repository }}/prime-artifacts/credentials AWS_SECRET_ACCESS_KEY | PRIME_ARTIFACTS_UPLOADER_SECRET_KEY
+    
+    - name: Upload to S3
+      shell: bash
+      env:
+        AWS_ACCESS_KEY_ID: ${{ env.PRIME_ARTIFACTS_UPLOADER_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ env.PRIME_ARTIFACTS_UPLOADER_SECRET_KEY }}
+      run: |
+        for file in ${{ inputs.artifacts_path }}; do
+          aws s3 cp "$file" "s3://${{ inputs.bucket_name }}/${{ inputs.destination }}/$(basename "$file")"
+        done
