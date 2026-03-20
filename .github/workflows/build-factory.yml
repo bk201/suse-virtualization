@@ -247,6 +247,8 @@ jobs:
       env:
         REPO: ${{ env.DOCKER_REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}
         DRONE_BRANCH: ${{ env.branch }}
+        HARVESTER_INSTALLER_REPO: "https://github.com/bk201/harvester-installer.git"
+        HARVESTER_INSTALLER_REF: "wip-prime-build"
 
     - name: build-tag-iso
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -256,6 +258,8 @@ jobs:
         REPO: ${{ env.DOCKER_REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}
         DRONE_BRANCH: ${{ github.ref_name }}
         DRONE_TAG: ${{ github.ref_name }}
+        HARVESTER_INSTALLER_REPO: "https://github.com/bk201/harvester-installer.git"
+        HARVESTER_INSTALLER_REF: "wip-prime-build"
 
     # rancher/harvester-cluster-repo image
     - name: docker-publish-harvester-cluster-repo
